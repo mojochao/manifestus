@@ -1,0 +1,38 @@
+# By adding the renderfile.yaml file to the environment values, we can use the
+# values in the renderfile.yaml file to populate the helmfile.yaml file, or any
+# of the config/*.values.yaml.gotmpl files configuring the Helm releases.
+environments:
+  default:
+    values:
+    - renderfile.yaml
+
+# Helmfile will ensure that the repositories are updated before running the
+# 'helmfile template' command to render manifests, unless the --no-helm-repo-update
+# flag is passed to the 'manifestus preview', 'manifestus update' commands.
+repositories:
+- name: external-dns
+  url: https://kubernetes-sigs.github.io/external-dns
+
+- name: jetstack
+  url: https://charts.jetstack.io
+
+# App release names defined in the renderfile.yaml file used to identify the Helm
+# releases in this Helmfile configuration. That means that only the release name
+# is required to identify the Helm release in the Helmfile configuration.
+# Note that below we are using the values from the renderfile.yaml file to populate
+# additional Helm release configuration here, and are made available to the Helm
+# release configuration in the config/*.values.yaml.gotmpl template files if desired.
+releases:
+- name: cert-manager
+  namespace: {{ .Values.manifestus.apps.certManager.release.data.namespace }}
+  chart: {{ .Values.manifestus.apps.certManager.release.data.chart }}
+  version: {{ .Values.manifestus.apps.certManager.release.data.version }}
+  values:
+  - config/cert-manager.values.yaml.gotmpl
+
+- name: external-dns
+  namespace: {{ .Values.manifestus.apps.externalDns.release.data.namespace }}
+  chart: {{ .Values.manifestus.apps.externalDns.release.data.chart }}
+  version: {{ .Values.manifestus.apps.externalDns.release.data.version }}
+  values:
+  - config/external-dns.values.yaml.gotmpl

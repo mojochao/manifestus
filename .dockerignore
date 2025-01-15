@@ -1,0 +1,23 @@
+# asdf files
+.tool-versions
+
+# built binary files
+bin/
+
+# direnv files
+.envrc
+
+# dotenv files
+.env
+
+# git repo files
+.git/
+
+# markdown files
+*.md
+
+# yaml files
+*.yaml
+
+# temp files
+tmp/

@@ -1,0 +1,68 @@
+# This is a sample renderfile.yaml file that can be used to render manifests
+# from helm releases defined in the helmfile.yaml, local and remote kustomizations,
+# and static manifests copied from filesystem paths or fetched from remote URLs.
+renderfile:
+
+  # This is the first version of the Renderfile schema, which is used to validate
+  # the renderfile.yaml file before rendering manifests.
+  schema: "v1"
+
+  # The 'apps' list is used to define all stack workloads to be rendered.
+  apps:
+
+  # Each 'app' object must have a name field used to identify it and be used
+  # in organizing the rendered manifests output.
+  - name: cert-manager
+
+    # The optional 'disabled' field is used to disable rendering of the app
+    # without having to remove the app from the Renderfile or comment it out.
+    disabled: false
+
+    # The optional 'releases' list is used to define the Helm releases
+    # with templates to render.
+    releases:
+
+    # The 'name' field is used to identify the Helm release in the Helmfile
+    # configuration. It is the only required field in the release object
+    # and is used in naming the rendered manifests artifact.
+    - name: cert-manager
+
+      # The optional 'helmfile' field is used to define the path to the Helmfile
+      # to use for rendering the Helm release. If not provided, the Helmfile will
+      # be searched for in the same directory as the renderfile.yaml file in use.
+#      helmfile: path/to/helmfile.yaml
+
+    # The optional 'kustomizations' list is used to define the local and
+    # remote kustomizations used to render manifests for the app.
+#    kustomizations:
+#    - name: a-local-example
+#      source: some/path/to/kustomization.yaml
+#    - name: a-remote-example
+#      source: https://github.com/some/repo/config/kustomization.yaml
+
+    # The optional 'bundles' list is used to define the static manifests that
+    # are copied from filesystem paths or fetched from remote URLs.
+    bundles:
+
+    # Each 'bundle' object must have a 'name' field that is used to identify
+    # the bundle in the list of bundles for the app. This name is used in
+    # naming the rendered manifests artifact.
+    - name: crds
+
+      # Fhe data field is used to define the values that are available for
+      # expansion in the sources list.
+      data:
+        app_version: "v1.16.2"
+        base_uri: github.com/cert-manager/cert-manager/releases/download
+
+      # Sources are used to define the filesystem paths or remote URLs of
+      # static manifests.
+      sources:
+      - https://{base_uri}/{app_version}/cert-manager.crds.yaml
+
+    # The remaining apps are defined in the same way as the certManager app
+    # above, but without the accompanying documentation for brevity.
+  - name: external-dns
+    enabled: true
+    releases:
+    - name: external-dns
