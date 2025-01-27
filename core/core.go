@@ -95,7 +95,12 @@ func GetManifests(renders []*Render) []*Manifest {
 	// Return manifests from the mapped renders.
 	manifestList := make([]*Manifest, 0)
 	for key, renders := range seen {
-		manifest := NewManifest(key.appName, key.srcName, key.srcType, renders)
+		manifest := &Manifest{
+			AppName: key.appName,
+			SrcName: key.srcName,
+			SrcType: key.srcType,
+			Renders: renders,
+		}
 		manifestList = append(manifestList, manifest)
 	}
 	return manifestList

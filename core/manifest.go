@@ -16,16 +16,6 @@ type Manifest struct {
 	Renders Renders
 }
 
-// NewManifest returns a new Manifest for app name and renderer src type.
-func NewManifest(appName, srcName, srcType string, renders Renders) *Manifest {
-	return &Manifest{
-		AppName: appName,
-		SrcName: srcName,
-		SrcType: srcType,
-		Renders: renders,
-	}
-}
-
 // Doc returns the assembled, cleaned Manifest renders as a single document.
 // It adds a source header comment followed by all the yaml renders separated by '---'.
 func (m *Manifest) Doc() string {
