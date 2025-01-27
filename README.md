@@ -1,11 +1,7 @@
-# manifestus - render kubernetes manifests
+# manifestus
 
-The `manifestus` CLI is a tool to render Kubernetes resource manifests for
-multiple environments of a stack of one or more workloads defined in a loaded
-configuration for management of Kubernetes cluster state in pull-based
-[GitOps](https://opengitops.dev/) workflows with the
-[Rendered Manifests](https://medium.com/@PlanB./rendered-manifests-pattern-the-new-standard-for-gitops-c0b9b020f3b6)
-pattern, sometimes also called "manifest hydration".
+`manifestus` is a CLI to render Kubernetes resource manifests for application
+stack workloads from various sources of Kubernetes resource manifests defined
+in a single, loaded *Renderfile* configuration.
 
-For more information, check out the [local](docs/README.md) or
-[online](https://mojochao.github.io/manifestus) documentation.
+For more information, check out the [local](docs/README.md) or [online](https://mojochao.github.io/manifestus) documentation.
