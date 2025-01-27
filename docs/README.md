@@ -384,18 +384,18 @@ manifestus render --dry-run
 To update the rendered manifests for the cluster, run:
 
 ```shell
-manifestus update
+manifestus write
 ```
 
-After this command is run, the rendered manifests will be updated in the output
+After this command is run, the rendered manifests will be written to the output
 directory, and the changes can be examined locally with the `git` CLI, or your
 Git GUI of choice, before adding them to a commit in your change request branch.
 
-The rendered manifests are output to a directory structure that mirrors the
-configuration structure. The output directory is created in the current working
-directory by default, but can be overridden with the `--output-dir` flag.
+The output directory is created in the current working directory by default,
+but can be overridden with the `--output-dir` flag.
 
-The output directory structure is as follows:
+Rendered manifests are written to a directory structure that mirrors the
+Renderfile configuration structure. 
 
 ```text
 $OUTPUT_DIR/
@@ -407,20 +407,6 @@ $OUTPUT_DIR/<app_name>/<kustomization_name_b>.kustomization.manifest.yaml
 $OUTPUT_DIR/<app_name>/<bundle_name_a>.bundle.manifest.yaml
 $OUTPUT_DIR/<app_name>/<bundle_name_b>.bundle.manifest.yaml
 ```
-
-One common category name for bundles is `crds`.
-
-```text
-apps/cert-manager/crds.bundle.manifest.yaml
-```
-
-Another useful category name might be `externalsecrets`.
-
-```text
-apps/grafana/externalsecrets.bundle.manifest.yaml
-```
-
-Note that the `<bundle_name>` is sourced by the category name of the bundle.
 
 ### Checking rendered manifests
 
@@ -439,8 +425,8 @@ and the command will return an exit code of `1`.
 ## Prior art
 
 The `manifestus` app is inspired by the [Rendered Manifests](https://medium.com/@PlanB./rendered-manifests-pattern-the-new-standard-for-gitops-c0b9b020f3b6)
-pattern, which is a new-ish practice for GitOps workflows that uses rendered
-manifests as the source of truth for the state of a Kubernetes cluster.
+pattern, which is an emerging best practice for GitOps workflows that uses
+rendered manifests as the source of truth for Kubernetes cluster state.
 
 Other tools existing in this space include:
 

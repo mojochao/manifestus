@@ -27,7 +27,7 @@ func New() *cli.App {
 			appsCommand,
 			outputsCommand,
 			renderCommand,
-			updateCommand,
+			writeCommand,
 			checkCommand,
 			versionCommand,
 		},
@@ -152,9 +152,9 @@ var renderCommand = &cli.Command{
 	},
 }
 
-var updateCommand = &cli.Command{
-	Name:  "update",
-	Usage: "Update rendered manifests in output directory",
+var writeCommand = &cli.Command{
+	Name:  "write",
+	Usage: "Write rendered manifests to output directory",
 	Flags: []cli.Flag{
 		&renderfileFlag,
 		&outputDirFlag,
@@ -215,7 +215,7 @@ var updateCommand = &cli.Command{
 
 var checkCommand = &cli.Command{
 	Name:  "check",
-	Usage: "Check that rendered manifests are up-to-date with their sources.\n\nExit with a non-zero status code if differences are found.",
+	Usage: "Check that rendered manifests are up-to-date with their sources.\n\nExit with status code 1 if differences are found.",
 	Flags: []cli.Flag{
 		&renderfileFlag,
 		&outputDirFlag,
