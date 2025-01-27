@@ -3,11 +3,9 @@ name: Publish Go releases
 on:
   pull_request:
   push:
-    # run only against tags on main
+    # run only against tags
     tags:
     - "v*"
-    branches:
-    - main
 
 permissions:
   contents: write
