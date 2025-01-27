@@ -37,7 +37,7 @@ operators working with application stacks of their own.
   - [Targeting specific apps](#targeting-specific-apps)
   - [Listing outputs of the rendered manifests](#listing-outputs-of-the-rendered-manifests)
   - [Previewing rendered manifests](#previewing-rendered-manifests)
-  - [Updating rendered manifests](#updating-rendered-manifests)
+  - [Writing rendered manifests](#writing-rendered-manifests)
   - [Checking rendered manifests](#checking-rendered-manifests)
 - [Prior art](#prior-art)
 - [References](#references)
@@ -379,9 +379,9 @@ you can use the `--dry-run` flag:
 manifestus render --dry-run
 ```
 
-### Updating rendered manifests
+### Writing rendered manifests
 
-To update the rendered manifests for the cluster, run:
+To write the rendered manifests for the cluster, run:
 
 ```shell
 manifestus write
