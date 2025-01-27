@@ -23,6 +23,7 @@ operators working with application stacks of their own.
 - [Overview](#overview)
 - [A simple change management workflow](#a-simple-change-management-workflow)
 - [Installation](#installation)
+  - [Dependencies](#dependencies)
   - [Local binaries](#local-binaries)
   - [Docker image](#docker-image)
 - [Configuration](#configuration)
@@ -126,15 +127,9 @@ The lifecycle of a configuration Change Request is defined here as follows:
 
 ## Installation
 
-### Local binaries
+### Dependencies
 
-`manifestus` is a Golang app that may be installed with `go install`:
-
-```shell
-go install github.com/mojochao/manifestus@latest
-```
-
-`manifestus` uses the following additional tools to render manifests:
+`manifestus` depends on the following additional tools to render manifests:
 
 - the [`helm`](https://helm.sh/docs/helm/) CLI to render manifests from local or
   remote [Helm charts](https://helm.sh/docs/topics/charts/)
@@ -143,8 +138,7 @@ go install github.com/mojochao/manifestus@latest
 - the [`kustomize`](https://kustomize.io/) CLI to render manifests from local or remote
   [kustomizations](https://kubectl.docs.kubernetes.io/references/kustomize/glossary/#kustomization)
 
-These tools must be installed and available in the `PATH` for the `manifestus`
-CLI to work correctly.
+These tools must be installed and available in the `PATH` for `manifestus` to run.
 
 These tools are easily installable with the [`brew`](https://brew.sh/) package
 manager:
@@ -172,24 +166,35 @@ You do *not* need to install the [`helm-diff`](https://github.com/databus23/helm
 plugin, as `helm` is only used to template chart manifests, and not to manage
 chart releases in the cluster.
 
-As the rendered manifests are modified in your locally cloned Git repository,
-you can examine changes to them, and the source changes responsible for the
-changed renders,  with the `git` CLI, or your favorite Git GUI.
-
-An additional benefit of pushing these changes to a change request branch off
-the `main`branch is that both the source and output changes will be displayed
-in the diff view of the pull request (PR) when reviewed, before acceptance and
-merge back to the `main`branch for application by the cluster GitOps controller.
-
 > Note: The `diff` CLI is also required when running the `manifestus check` command.
 > It is probably already installed on your system, but if it is not, you will
 > need to install it as well.
 
+### Local binaries
+
+One way to install `manifestus` is to download a pre-built binary from its
+[releases](https://github.com/mojochao/manifestus/releases) page.
+
+Like to live on the edge by executing random shell scripts from the internet?
+Go for it!
+
+```shell
+curl -sSfL https://raw.githubusercontent.com/mojochao/manifestus/main/install.sh | sh -s -- -b $HOME/bin
+```
+
+If you have `go` installed, you may also install it with `go install`:
+
+```shell
+go install github.com/mojochao/manifestus@latest
+```
+
 ### Docker image
 
-The `manifestus` app is also available as a Docker image with all the necessary
-tools pre-installed. The following example demonstrates use of the `manifestus`
-Docker image to list apps defined in the local `testdata/renderfile.yaml` file.
+`manifestus` is also available as a Docker image with all the required tool
+dependencies pre-installed.
+
+The following example demonstrates use of the `manifestus` Docker image to list
+apps defined in the local `testdata/renderfile.yaml` file.
 
 ```shell
 docker run --rm -it -v $(pwd)/testdata:/testdata ghcr.io/mojochao/manifestus:latest -- apps -f /testdata/renderfile.yaml
@@ -197,12 +202,11 @@ docker run --rm -it -v $(pwd)/testdata:/testdata ghcr.io/mojochao/manifestus:lat
 
 ## Configuration
 
-Configuration for `manifestus` is defined in a `renderfile.yaml` Renderfile.
+Configuration for `manifestus` is defined in a Renderfile, `renderfile.yaml`.
 By default, `manifestus` looks for this file in the current working directory.
-The name and location of the configuration can be overridden with the
-`--config-file` flag.
+The name and location of the configuration can be overridden with the `--config-file` flag.
 
-Its schema as follows, from the top:
+Its schema is as follows, from the top:
 
 ```yaml
 # Root renderfile object fields
@@ -258,7 +262,6 @@ name: str          # Required name of the bundle
 data: map[str]str  # Optional arbitrary string data to pass to the bundle renderer for expansion in 'sources' items
 sources: []str     # Required list of local paths or remote URLs to static manifests
 ```
-
 
 See the [test configuration](../testdata/renderfile.yaml) for a full example.
 
