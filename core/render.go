@@ -50,32 +50,16 @@ type Render struct {
 	Err error
 }
 
-// Doc returns the normalized, rendered manifest output as a string.
-// Normalization includes trimming leading and trailing whitespace and
-// redundant multi-doc YAML separators.
+// Doc returns the normalized, rendered manifest output as a string trimming leading and trailing whitespace.
 func (r Render) Doc() string {
 	return strings.TrimSpace(string(r.Stdout))
 }
 
-// Docs returns normalized, rendered manifests documents in render command output in stdout.
-// YAML documents may contain multiple resources separated by '---' multi-doc
-// YAML object separators.
-// Normalization includes trimming leading and trailing whitespace and
-// redundant multi-doc YAML separators.
+// Docs returns normalized, rendered manifests documents from render command output in stdout.
 func (r Render) Docs() []string {
-	// Split the doc into multiple docs if it is a multi-doc YAML file.
-	// Start by trimming leading and trailing whitespace.
-	s := strings.TrimSpace(string(r.Stdout))
-	// Next trim any YAML separator from the beginning of the doc.
-	s = strings.TrimPrefix(s, fmt.Sprintf("%s\n", yamlSep))
-	// Then trim any YAML separator from the end of the doc.
-	s = strings.TrimSuffix(s, fmt.Sprintf("\n%s", yamlSep))
-	// Finally split the doc into multiple parts.
-	parts := strings.Split(s, "\n---\n")
-	// Collect all doc parts into a slice of cleaned parts.
 	docs := make([]string, 0)
-	for _, part := range parts {
-		docs = append(docs, strings.TrimSpace(part))
+	for _, doc := range docs {
+		docs = append(docs, strings.TrimSpace(doc))
 	}
 	return docs
 }

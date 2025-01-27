@@ -26,15 +26,15 @@ func NewManifest(appName, srcName, srcType string, renders Renders) *Manifest {
 	}
 }
 
-// Doc returns the assembled, cleaned Manifest renders as a string
+// Doc returns the assembled, cleaned Manifest renders as a single document.
+// It adds a source header comment followed by all the yaml renders separated by '---'.
 func (m *Manifest) Doc() string {
-	doc := fmt.Sprintf("# %s %s manifest rendered by manifestus\n", m.AppName, m.SrcType)
-	parts := make([]string, 0)
-	parts = append(parts, doc)
+	header := fmt.Sprintf("#:manifestus render{appName=%s, srcName=%s, srcType=%s}", m.AppName, m.SrcName, m.SrcType)
+	docs := make([]string, 0)
 	for _, render := range m.Renders {
-		parts = append(parts, render.Doc())
+		docs = append(docs, render.Doc())
 	}
-	return strings.Join(parts, fmt.Sprintf("\n%s\n", yamlSep))
+	return fmt.Sprintf("%s\n%s", header, strings.Join(docs, "\n---\n"))
 }
 
 // Write writes the manifest to a file in the output directory.
@@ -49,6 +49,3 @@ func (m *Manifest) Write(outputDir string) (string, error) {
 	err := os.WriteFile(p, []byte(m.Doc()), 0644)
 	return p, err
 }
-
-// yamlSep is the delimiter for separating YAML documents in a multi-document YAML file.
-const yamlSep = "---"
