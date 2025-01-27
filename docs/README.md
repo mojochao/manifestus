@@ -1,8 +1,7 @@
 # manifestus
 
 `manifestus` is a CLI to render Kubernetes resource manifests for application
-stack workloads from various sources of Kubernetes resource manifests defined
-in a single, loaded *Renderfile* configuration.
+stack workloads from various sources defined in a *Renderfile* configuration.
 
 While the rendered manifests may be imperatively applied to a Kubernetes cluster,
 it is intended *primarily for management of Kubernetes cluster state in pull-based
