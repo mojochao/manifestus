@@ -47,7 +47,7 @@ operators working with application stacks of their own.
 `manifestus` was designed with a few primary goals in mind:
 
 - to provide a simple, consistent, and repeatable way to render Kubernetes
-  resource manifests for workload stacks of of multiple applications defined in
+  resource manifests for workload stacks of multiple applications defined in
   a single, simple configuration file
 - to reuse common, existing, well-known tools like [Helm](https://helm.sh/),
   [Helmfile](https://helmfile.readthedocs.io/), and [Kustomize](https://kustomize.io/)
