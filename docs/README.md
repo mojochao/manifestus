@@ -266,20 +266,20 @@ See the [test configuration](../testdata/renderfile.yaml) for a full example.
 
 ## Usage
 
-> Pro tip: When using interactively, go "Samuel L. Jackson" on your manifests
-> with an alias:
+> Pro tip: When using interactively, save your keystrokes and go OG on your
+> manifests with a shell alias:
 > 
 > ```shell
 > alias mf=manifestus
 > ```
 > 
-> Now render like a badass:
+> Now render gangsta style:
 > 
 > ```shell
 > mf render
 > ```
 >
-> Much better, right?
+> Much better, right?!
 
 ### Getting help
 
