@@ -8,10 +8,10 @@ it is intended *primarily for management of Kubernetes cluster state in pull-bas
 [GitOps](https://opengitops.dev/) workflows implemented in terms of
 [Rendered Manifests](https://medium.com/@PlanB./rendered-manifests-pattern-the-new-standard-for-gitops-c0b9b020f3b6).
 
-The Latin word "manifestus" means "clear," "public,", "obvious", or "transparent".
+The Latin word *manifestus* means "clear," "public,", "obvious", or "transparent".
 It is hoped that this tool will make Kubernetes resource manifests, and changes
 to them, the same.
-The word "manifestus" may also have connotations of "notorious" or "infamous".
+The word *manifestus* may also have connotations of "notorious" or "infamous".
 Time will tell.
 
 `manifestus` is primarily intended for use by Platform Engineers in the
