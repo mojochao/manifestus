@@ -175,7 +175,7 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 	for _, source := range paths {
 		data, err := readDocument(path.Join(configDir, source))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to read %s: %w", source, err)
 		}
 		renders = append(renders, &Render{
 			AppName: appName,
@@ -191,6 +191,9 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 	}
 	for _, source := range urls {
 		data, err := fetchDocument(source)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch %s: %w", source, err)
+		}
 		renders = append(renders, &Render{
 			AppName: appName,
 			SrcName: bundle.Name,

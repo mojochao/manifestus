@@ -64,22 +64,24 @@ func isURL(s string) bool {
 	return strings.HasPrefix(s, "https://")
 }
 
-// fetchDocument makes an HTTP GET request to the given URL and returns the document text and any error encountered.
+// fetchDocument makes an HTTP GET request to the given URL and returns the document data and any error encountered.
 func fetchDocument(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
+		if err := Body.Close(); err != nil {
 			fmt.Printf("failed to close response body: %v", err)
 		}
 	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 	return io.ReadAll(resp.Body)
 }
 
-// readDocument reads the contents of a file at the given path and returns the document text and any error encountered.
+// readDocument reads the contents of a file at the given path and returns the document data and any error encountered.
 func readDocument(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
