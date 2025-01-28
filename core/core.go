@@ -110,3 +110,65 @@ func GetManifests(renders []*Render) []*Manifest {
 func getOutputFilePath(appName, srcName, srcType string) string {
 	return path.Join(appName, fmt.Sprintf("%s.%s.manifest.yaml", srcName, srcType))
 }
+
+// Chart represents metadata of a Helm chart defined in a Renderfile or Helmfile.
+type Chart struct {
+	Name    string
+	Version string
+	App     string
+}
+
+// LatestVersion returns the latest version of the Helm chart.
+func (c Chart) LatestVersion() (string, error) {
+	cmdline := fmt.Sprintf("helm search repo %s --max 1 | awk 'NR==2 {print $2}'", c.Name)
+	_, stdout, stderr, exit, err := execCmd(cmdline, "")
+	if err != nil {
+		return string(stderr), err
+	}
+	if exit != 0 {
+		return string(stderr), fmt.Errorf("failed to get latest version for chart '%s'", c.Name)
+	}
+	return string(stdout), nil
+}
+
+func GetCharts(cfg *Config, appNames []string) ([]*Chart, error) {
+	results := make([]*Chart, 0)
+	for _, appName := range appNames {
+		app := cfg.FindApp(appName)
+		var chartInfo *Chart
+		for _, release := range app.Releases {
+			if release.Chart != "" {
+				chartInfo = &Chart{
+					Name:    release.Chart,
+					Version: release.Version,
+					App:     appName,
+				}
+			} else {
+				chart, version, err := getHelmfileHelmChartAndVersion(release.Helmfile, release.Name)
+				if err != nil {
+					return nil, err
+				}
+				chartInfo = &Chart{
+					Name:    chart,
+					Version: version,
+					App:     appName,
+				}
+			}
+			results = append(results, chartInfo)
+		}
+	}
+	return results, nil
+}
+
+// ExecHelmRepoUpdate executes the 'helm repo update' command.
+func ExecHelmRepoUpdate() error {
+	cmdline := "helm repo update"
+	_, _, _, exit, err := execCmd(cmdline, "")
+	if err != nil {
+		return fmt.Errorf("failed to update Helm repositories: error=%w", err)
+	}
+	if exit != 0 {
+		return fmt.Errorf("failed to update Helm repositories: exit=%d", exit)
+	}
+	return nil
+}

@@ -8,6 +8,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 	"github.com/urfave/cli/v2"
 
 	"github.com/mojochao/manifestus/core"
@@ -25,6 +27,7 @@ func New() *cli.App {
 		Usage: "Render Kubernetes manifests from a declarative configuration",
 		Commands: []*cli.Command{
 			appsCommand,
+			chartsCommand,
 			outputsCommand,
 			renderCommand,
 			writeCommand,
@@ -50,6 +53,47 @@ var appsCommand = &cli.Command{
 		for _, app := range cfg.EnabledApps() {
 			fmt.Println(app.Name)
 		}
+		return nil
+	},
+}
+
+var chartsCommand = &cli.Command{
+	Name:  "charts",
+	Usage: "Show table of charts used",
+	Flags: []cli.Flag{
+		&renderfileFlag,
+		&appNamesFlag,
+		&latestFlag,
+		&outdatedFlag,
+	},
+	Action: func(c *cli.Context) error {
+		// Load the config file from disk.
+		cfg, err := core.LoadConfig(flags.RenderFile)
+		exitOnError(err, -1)
+
+		// Ensure that we have app names and the app names exist in the config.
+		appNames := flags.AppNames.Value()
+		if len(appNames) == 0 {
+			appNames = cfg.EnabledAppNames()
+		} else {
+			err = core.EnsureAppNamesExist(cfg, flags.AppNames.Value())
+			exitOnError(err, -1)
+		}
+
+		charts, err := core.GetCharts(cfg, appNames)
+		exitOnError(err, -1)
+
+		latest := latestFlag.Value
+		outdated := outdatedFlag.Value
+		if latest || outdated {
+			err := core.ExecHelmRepoUpdate()
+			exitOnError(err, -1)
+		}
+
+		table, err := getChartsTable(charts, latest, outdated)
+		exitOnError(err, -1)
+
+		table.Print()
 		return nil
 	},
 }
@@ -299,6 +343,8 @@ var flags struct {
 	DryRun     bool
 	Quiet      bool
 	Verbose    bool
+	Latest     bool
+	Outdated   bool
 }
 
 var renderfileFlag = cli.StringFlag{
@@ -366,6 +412,18 @@ var verboseFlag = cli.BoolFlag{
 	Destination: &flags.Verbose,
 }
 
+var latestFlag = cli.BoolFlag{
+	Name:        "latest",
+	Usage:       "Show the latest version of each chart",
+	Destination: &flags.Latest,
+}
+
+var outdatedFlag = cli.BoolFlag{
+	Name:        "outdated",
+	Usage:       "Show only outdated charts",
+	Destination: &flags.Outdated,
+}
+
 // diffDirs runs the `diff` command to compare the contents of two directories.
 // An empty string is returned if the directories are the same.
 // An error is returned if the `diff` command fails.
@@ -398,4 +456,33 @@ func printMsg(msg string, verboseOnly bool) {
 	// Trim newline from message to avoid double newlines.
 	_, err := fmt.Fprintln(os.Stdout, strings.TrimSuffix(msg, "\n"))
 	exitOnError(err, -1)
+}
+
+// getChartsTable returns a table of charts.
+func getChartsTable(charts []*core.Chart, includeLatest, onlyOutdated bool) (table.Table, error) {
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+	tbl := table.New("App", "Chart", "Version")
+	if includeLatest {
+		tbl = table.New("App", "Chart", "Version", "Latest")
+	}
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+	for _, chart := range charts {
+		if !includeLatest && !onlyOutdated {
+			tbl.AddRow(chart.App, chart.Name, chart.Version)
+			continue
+		}
+		if includeLatest {
+			latestVersion, err := chart.LatestVersion()
+			if err != nil {
+				return tbl, err
+			}
+			if !onlyOutdated || chart.Version != latestVersion {
+				tbl.AddRow(chart.App, chart.Name, chart.Version, latestVersion)
+			}
+		}
+	}
+	return tbl, nil
 }

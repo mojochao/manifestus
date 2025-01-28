@@ -39,6 +39,7 @@ operators working with application stacks of their own.
   - [Previewing rendered manifests](#previewing-rendered-manifests)
   - [Writing rendered manifests](#writing-rendered-manifests)
   - [Checking rendered manifests](#checking-rendered-manifests)
+  - [Checking releases for outdated charts](#checking-releases-for-outdated-charts)
 - [Prior art](#prior-art)
 - [References](#references)
 
@@ -421,6 +422,31 @@ manifestus check
 If no differences exist, the command will return an exit code of `0`.
 If differences do exist, they will be printed as a diff to standard output
 and the command will return an exit code of `1`.
+
+### Checking releases for outdated charts
+
+The `charts` command can be used to show Helm chart releases used by apps.
+
+```shell
+manifestus charts
+```
+
+You can also show the latest version of the Helm chart releases used by apps
+with the `--latest` flag.
+
+```shell
+manifestus charts --latest
+```
+
+You can restrict the output to outdated Helm chart releases with the `--outdated`
+flag.
+
+```shell
+manifestus charts --outdated
+```
+
+The exit code will be `0` if no outdated Helm chart releases are found, and `1`
+if any are found.
 
 ## Prior art
 
