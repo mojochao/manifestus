@@ -205,6 +205,7 @@ var writeCommand = &cli.Command{
 		&appNamesFlag,
 		&srcNamesFlag,
 		&srcTypesFlag,
+		&cleanFlag,
 		&debugFlag,
 		&verboseFlag,
 	},
@@ -237,12 +238,14 @@ var writeCommand = &cli.Command{
 		renders, err := core.GetRenders(cfg, appNames, flags.SrcNames.Value(), srcTypes, flags.Debug, flags.DryRun)
 		exitOnError(err, -1)
 
-		// Ensure that we're starting with a clean output directory.
-		for _, appName := range appNames {
-			appDir := path.Join(flags.OutputDir, appName)
-			printMsg(fmt.Sprintf("Cleaning up %s\n", appDir), true)
-			if err := os.RemoveAll(appDir); err != nil {
-				exitOnError(err, -1)
+		// Clean output directories if the clean flag is set.
+		if flags.Clean {
+			for _, appName := range appNames {
+				appDir := path.Join(flags.OutputDir, appName)
+				printMsg(fmt.Sprintf("Cleaning up %s\n", appDir), true)
+				if err := os.RemoveAll(appDir); err != nil {
+					exitOnError(err, -1)
+				}
 			}
 		}
 
@@ -339,6 +342,7 @@ var flags struct {
 	AppNames   cli.StringSlice
 	SrcNames   cli.StringSlice
 	SrcTypes   cli.StringSlice
+	Clean      bool
 	Debug      bool
 	DryRun     bool
 	Quiet      bool
@@ -384,6 +388,12 @@ var srcTypesFlag = cli.StringSliceFlag{
 	Aliases:     []string{"t"},
 	Usage:       fmt.Sprintf("Specify the type of source to render (valid: %s)", validSrcTypes),
 	Destination: &flags.SrcTypes,
+}
+
+var cleanFlag = cli.BoolFlag{
+	Name:        "clean",
+	Usage:       "Clean the output directory before writing rendered manifests",
+	Destination: &flags.Clean,
 }
 
 var debugFlag = cli.BoolFlag{
