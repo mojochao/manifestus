@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/fatih/color"
@@ -222,6 +223,7 @@ var writeCommand = &cli.Command{
 			err = core.EnsureAppNamesExist(cfg, appNames)
 			exitOnError(err, -1)
 		}
+		sort.Strings(appNames)
 
 		// Ensure that we have src types and they are valid.
 		srcTypes := flags.SrcTypes.Value()

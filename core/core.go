@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"path"
+	"sort"
 )
 
 // EnsureAppNamesExist checks if the given app names exist in the Config.
@@ -94,7 +95,21 @@ func GetManifests(renders []*Render) []*Manifest {
 
 	// Return manifests from the mapped renders.
 	manifestList := make([]*Manifest, 0)
-	for key, renders := range seen {
+	keys := make([]descriptor, 0, len(seen))
+	for key := range seen {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].appName != keys[j].appName {
+			return keys[i].appName < keys[j].appName
+		}
+		if keys[i].srcName != keys[j].srcName {
+			return keys[i].srcName < keys[j].srcName
+		}
+		return keys[i].srcType < keys[j].srcType
+	})
+
+	for _, key := range keys {
 		manifest := &Manifest{
 			AppName: key.appName,
 			SrcName: key.srcName,
