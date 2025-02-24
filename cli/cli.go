@@ -254,7 +254,7 @@ var writeCommand = &cli.Command{
 		for _, manifest := range manifests {
 			path, err := manifest.Write(flags.OutputDir)
 			exitOnError(err, -1)
-			printMsg(fmt.Sprintf("Wrote %s\n", path), true)
+			printMsg(fmt.Sprintf("Wrote %s\n", path), false)
 		}
 		return nil
 	},
