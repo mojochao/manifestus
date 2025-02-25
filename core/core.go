@@ -110,11 +110,12 @@ func GetManifests(renders []*Render) []*Manifest {
 	})
 
 	for _, key := range keys {
+		appRenders := seen[key]
 		manifest := &Manifest{
 			AppName: key.appName,
 			SrcName: key.srcName,
 			SrcType: key.srcType,
-			Renders: renders,
+			Renders: appRenders,
 		}
 		manifestList = append(manifestList, manifest)
 	}

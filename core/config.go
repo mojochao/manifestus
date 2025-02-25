@@ -69,6 +69,7 @@ func (c *Config) EnabledAppNames() []string {
 	for i, app := range enabled {
 		names[i] = app.Name
 	}
+	sort.Strings(names)
 	return names
 }
 
@@ -155,13 +156,14 @@ type Bundle struct {
 func (b Bundle) Paths() ([]string, error) {
 	paths := make([]string, 0)
 	for _, source := range b.Sources {
-		if !isURL(source) {
-			path, err := expandTemplate(source, b.Data)
-			if err != nil {
-				return nil, err
-			}
-			paths = append(paths, path)
+		if isURL(source) {
+			continue
 		}
+		path, err := expandTemplate(source, b.Data)
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
 	}
 	return paths, nil
 }
@@ -170,13 +172,14 @@ func (b Bundle) Paths() ([]string, error) {
 func (b Bundle) URLs() ([]string, error) {
 	urls := make([]string, 0)
 	for _, source := range b.Sources {
-		if isURL(source) {
-			url, err := expandTemplate(source, b.Data)
-			if err != nil {
-				return nil, err
-			}
-			urls = append(urls, url)
+		if !isURL(source) {
+			continue
 		}
+		url, err := expandTemplate(source, b.Data)
+		if err != nil {
+			return nil, err
+		}
+		urls = append(urls, url)
 	}
 	return urls, nil
 }

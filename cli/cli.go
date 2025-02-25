@@ -72,12 +72,9 @@ var chartsCommand = &cli.Command{
 		cfg, err := core.LoadConfig(flags.RenderFile)
 		exitOnError(err, -1)
 
-		// Ensure that we have app names and the app names exist in the config.
-		appNames := flags.AppNames.Value()
-		if len(appNames) == 0 {
-			appNames = cfg.EnabledAppNames()
-		} else {
-			err = core.EnsureAppNamesExist(cfg, flags.AppNames.Value())
+		// Get the app names to target.
+		appNames, err := getAppNames(cfg, flags.AppNames.Value())
+		if err != nil {
 			exitOnError(err, -1)
 		}
 
@@ -113,12 +110,9 @@ var outputsCommand = &cli.Command{
 		cfg, err := core.LoadConfig(flags.RenderFile)
 		exitOnError(err, -1)
 
-		// Ensure that we have app names and the app names exist in the config.
-		appNames := flags.AppNames.Value()
-		if len(appNames) == 0 {
-			appNames = cfg.EnabledAppNames()
-		} else {
-			err = core.EnsureAppNamesExist(cfg, flags.AppNames.Value())
+		// Get the app names to target.
+		appNames, err := getAppNames(cfg, flags.AppNames.Value())
+		if err != nil {
 			exitOnError(err, -1)
 		}
 
@@ -156,12 +150,9 @@ var renderCommand = &cli.Command{
 		cfg, err := core.LoadConfig(flags.RenderFile)
 		exitOnError(err, -1)
 
-		// Ensure that we have app names and the app names exist in the config.
-		appNames := flags.AppNames.Value()
-		if len(appNames) == 0 {
-			appNames = cfg.EnabledAppNames()
-		} else {
-			err = core.EnsureAppNamesExist(cfg, appNames)
+		// Get the app names to target.
+		appNames, err := getAppNames(cfg, flags.AppNames.Value())
+		if err != nil {
 			exitOnError(err, -1)
 		}
 
@@ -215,15 +206,11 @@ var writeCommand = &cli.Command{
 		cfg, err := core.LoadConfig(flags.RenderFile)
 		exitOnError(err, -1)
 
-		// Ensure that we have app names and the app names exist in the config.
-		appNames := flags.AppNames.Value()
-		if len(appNames) == 0 {
-			appNames = cfg.EnabledAppNames()
-		} else {
-			err = core.EnsureAppNamesExist(cfg, appNames)
+		// Get the app names to target.
+		appNames, err := getAppNames(cfg, flags.AppNames.Value())
+		if err != nil {
 			exitOnError(err, -1)
 		}
-		sort.Strings(appNames)
 
 		// Ensure that we have src types and they are valid.
 		srcTypes := flags.SrcTypes.Value()
@@ -278,12 +265,9 @@ var checkCommand = &cli.Command{
 		cfg, err := core.LoadConfig(flags.RenderFile)
 		exitOnError(err, -1)
 
-		// Ensure that we have app names and the app names exist in the config.
-		appNames := flags.AppNames.Value()
-		if len(appNames) == 0 {
-			appNames = cfg.EnabledAppNames()
-		} else {
-			err = core.EnsureAppNamesExist(cfg, appNames)
+		// Get the app names to target.
+		appNames, err := getAppNames(cfg, flags.AppNames.Value())
+		if err != nil {
 			exitOnError(err, -1)
 		}
 
@@ -468,6 +452,19 @@ func printMsg(msg string, verboseOnly bool) {
 	// Trim newline from message to avoid double newlines.
 	_, err := fmt.Fprintln(os.Stdout, strings.TrimSuffix(msg, "\n"))
 	exitOnError(err, -1)
+}
+
+// getAppNames returns the app names from the config file or the enabled apps if none are specified.
+func getAppNames(cfg *core.Config, appNames []string) ([]string, error) {
+	if len(appNames) == 0 {
+		appNames = cfg.EnabledAppNames()
+	} else {
+		if err := core.EnsureAppNamesExist(cfg, appNames); err != nil {
+			return nil, err
+		}
+	}
+	sort.Strings(appNames)
+	return appNames, nil
 }
 
 // getChartsTable returns a table of charts.

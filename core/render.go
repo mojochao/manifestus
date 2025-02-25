@@ -173,7 +173,8 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 		return nil, err
 	}
 	for _, source := range paths {
-		data, err := readDocument(path.Join(configDir, source))
+		source = path.Join(configDir, source)
+		data, err := readDocument(source)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read %s: %w", source, err)
 		}
@@ -181,6 +182,7 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 			AppName: appName,
 			SrcName: bundle.Name,
 			SrcType: "bundle",
+			CmdLine: fmt.Sprintf("cat %s", source), // No command executed for static manifests. Diagnostic only.
 			Stdout:  data,
 			Err:     err,
 		})
@@ -198,6 +200,7 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 			AppName: appName,
 			SrcName: bundle.Name,
 			SrcType: "bundle",
+			CmdLine: fmt.Sprintf("curl %s", source), // No command executed for static manifests. Diagnostic only.
 			Stdout:  data,
 			Err:     err,
 		})
