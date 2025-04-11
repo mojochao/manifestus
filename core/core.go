@@ -58,6 +58,14 @@ func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string, flatten 
 				paths = append(paths, getOutputFilePath(app.Name, bundle.Name, "bundle", flatten))
 			}
 		}
+		if contains(srcTypes, "crd") {
+			for _, crd := range app.CRDs {
+				if len(srcNames) > 0 && !contains(srcNames, crd.Name) {
+					continue
+				}
+				paths = append(paths, getOutputFilePath(app.Name, crd.Name, "crd", flatten))
+			}
+		}
 	}
 	return paths
 }

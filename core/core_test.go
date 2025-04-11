@@ -20,10 +20,10 @@ func Test_getOutputFilePath(t *testing.T) {
 			name: "should return output file path",
 			args: args{
 				appName: "cert-manager",
-				srcName: "crds",
+				srcName: "test",
 				srcType: "bundle",
 			},
-			want: path.Join("cert-manager", "crds.bundle.manifest.yaml"),
+			want: path.Join("cert-manager", "test.bundle.manifest.yaml"),
 		},
 	}
 	for _, tt := range tests {

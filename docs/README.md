@@ -30,6 +30,7 @@ operators working with application stacks of their own.
   - [Releases configuration](#releases-configuration)
   - [Kustomizations configuration](#kustomizations-configuration)
   - [Bundles configuration](#bundles-configuration)
+  - [CRDs configuration](#crds-configuration)
 - [Usage](#usage)
   - [Getting help](#getting-help)
   - [General conventions](#general-conventions)
@@ -265,6 +266,17 @@ sources: []str     # Required list of local paths or remote URLs to static manif
 
 See the [test configuration](../testdata/renderfile.yaml) for a full example.
 
+### CRDs configuration
+
+Each `CRD` object in `.renderfile.apps.*.crds` contains:
+
+```yaml
+# CRD object fields
+name: str          # Required name of the CRD
+data: map[str]str  # Optional arbitrary string data to pass to the CRD renderer for expansion in 'sources' items
+sources: []str     # Required list of local paths or remote URLs to static CRD manifests
+```
+
 ## Usage
 
 > Pro tip: When using interactively, save your keystrokes and go OG on your
@@ -331,7 +343,7 @@ It is sometimes useful to target specific source types for rendering. This
 can be done with the `--type` flag.
 
 ```shell
-manifestus render --app cert-manager --type bundle
+manifestus render --app cert-manager --type crd
 ```
 
 The `--type` flag may be provided multiple times to render multiple source types
@@ -343,7 +355,7 @@ be rendered.
 Sources may be further targeted by name with the `--name` flag.
 
 ```shell
-manifestus render --app cert-manager --type bundle --name crds
+manifestus render --app cert-manager --type crd --name v2
 ```
 
 The `--name` flag may be provided multiple times to render multiple sources in
@@ -407,6 +419,8 @@ $OUTPUT_DIR/<app_name>/<kustomization_name_a>.kustomization.manifest.yaml
 $OUTPUT_DIR/<app_name>/<kustomization_name_b>.kustomization.manifest.yaml
 $OUTPUT_DIR/<app_name>/<bundle_name_a>.bundle.manifest.yaml
 $OUTPUT_DIR/<app_name>/<bundle_name_b>.bundle.manifest.yaml
+$OUTPUT_DIR/<app_name>/<crd_name_a>.crds.manifest.yaml
+$OUTPUT_DIR/<app_name>/<crd_name_b>.crds.manifest.yaml
 ```
 
 ### Checking rendered manifests

@@ -107,6 +107,7 @@ type App struct {
 	Releases       []Release       `yaml:"releases"`
 	Kustomizations []Kustomization `yaml:"kustomizations"`
 	Bundles        []Bundle        `yaml:"bundles"`
+	CRDs           []CRD           `yaml:"crds"`
 }
 
 // Release represents the structure of a Helm chart release in '.manifestus.apps.*.releases' section of the config.
@@ -176,6 +177,45 @@ func (b Bundle) URLs() ([]string, error) {
 			continue
 		}
 		url, err := expandTemplate(source, b.Data)
+		if err != nil {
+			return nil, err
+		}
+		urls = append(urls, url)
+	}
+	return urls, nil
+}
+
+// CRD represents the structure of a CRD in '.manifestus.apps.*.crds' section of the config.
+type CRD struct {
+	Name    string            `yaml:"name"`
+	Data    map[string]string `yaml:"data"`
+	Sources []string          `yaml:"sources"`
+}
+
+// Paths returns filesystem paths in a CRD with {placeholders} replaced by values from the CRD's data.
+func (c CRD) Paths() ([]string, error) {
+	paths := make([]string, 0)
+	for _, source := range c.Sources {
+		if isURL(source) {
+			continue
+		}
+		path, err := expandTemplate(source, c.Data)
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
+	}
+	return paths, nil
+}
+
+// URLs returns filesystem paths in a CRD with {placeholders} replaced by values from the CRD's data.
+func (c CRD) URLs() ([]string, error) {
+	urls := make([]string, 0)
+	for _, source := range c.Sources {
+		if !isURL(source) {
+			continue
+		}
+		url, err := expandTemplate(source, c.Data)
 		if err != nil {
 			return nil, err
 		}

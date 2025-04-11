@@ -112,6 +112,18 @@ func getRendersForApp(app *App, srcNames, srcTypes []string, debug, dryRun bool)
 			results = append(results, renders...)
 		}
 	}
+	if contains(srcTypes, "crd") {
+		for _, crd := range app.CRDs {
+			if len(srcNames) > 0 && !contains(srcNames, crd.Name) {
+				continue
+			}
+			renders, err := renderCRD(app.Name, crd)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, renders...)
+		}
+	}
 	return results, nil
 }
 
@@ -199,6 +211,49 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 		renders = append(renders, &Render{
 			AppName: appName,
 			SrcName: bundle.Name,
+			SrcType: "bundle",
+			CmdLine: fmt.Sprintf("curl %s", source), // No command executed for static manifests. Diagnostic only.
+			Stdout:  data,
+			Err:     err,
+		})
+	}
+	return renders, nil
+}
+
+// renderCRD renders an App CRD object.
+func renderCRD(appName string, crd CRD) (Renders, error) {
+	renders := make(Renders, 0)
+	paths, err := crd.Paths()
+	if err != nil {
+		return nil, err
+	}
+	for _, source := range paths {
+		source = path.Join(configDir, source)
+		data, err := readDocument(source)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read %s: %w", source, err)
+		}
+		renders = append(renders, &Render{
+			AppName: appName,
+			SrcName: crd.Name,
+			SrcType: "bundle",
+			CmdLine: fmt.Sprintf("cat %s", source), // No command executed for static manifests. Diagnostic only.
+			Stdout:  data,
+			Err:     err,
+		})
+	}
+	urls, err := crd.URLs()
+	if err != nil {
+		return nil, err
+	}
+	for _, source := range urls {
+		data, err := fetchDocument(source)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch %s: %w", source, err)
+		}
+		renders = append(renders, &Render{
+			AppName: appName,
+			SrcName: crd.Name,
 			SrcType: "bundle",
 			CmdLine: fmt.Sprintf("curl %s", source), // No command executed for static manifests. Diagnostic only.
 			Stdout:  data,
