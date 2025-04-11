@@ -28,7 +28,7 @@ func Test_getOutputFilePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := getOutputFilePath(tt.args.appName, tt.args.srcName, tt.args.srcType); got != tt.want {
+			if got := getOutputFilePath(tt.args.appName, tt.args.srcName, tt.args.srcType, false); got != tt.want {
 				t.Errorf("getOutputFilePath() = %v, want %v", got, tt.want)
 			}
 		})

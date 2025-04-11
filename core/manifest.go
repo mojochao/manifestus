@@ -28,8 +28,8 @@ func (m *Manifest) Doc() string {
 }
 
 // Write writes the manifest to a file in the output directory.
-func (m *Manifest) Write(outputDir string) (string, error) {
-	p := path.Join(outputDir, getOutputFilePath(m.AppName, m.SrcName, m.SrcType))
+func (m *Manifest) Write(outputDir string, flatten bool) (string, error) {
+	p := path.Join(outputDir, getOutputFilePath(m.AppName, m.SrcName, m.SrcType, flatten))
 	if p, err := filepath.Abs(p); err != nil {
 		return p, err
 	}

@@ -104,6 +104,7 @@ var outputsCommand = &cli.Command{
 		&appNamesFlag,
 		&srcNamesFlag,
 		&srcTypesFlag,
+		&flattenFlag,
 	},
 	Action: func(c *cli.Context) error {
 		// Load the config file from disk.
@@ -126,7 +127,7 @@ var outputsCommand = &cli.Command{
 		}
 
 		// Print the output files of the rendered manifests for the apps to stdout.
-		outputs := core.GetOutputFiles(cfg, appNames, flags.SrcNames.Value(), srcTypes)
+		outputs := core.GetOutputFiles(cfg, appNames, flags.SrcNames.Value(), srcTypes, flags.Flatten)
 		for _, output := range outputs {
 			fmt.Println(output)
 		}
@@ -200,6 +201,7 @@ var writeCommand = &cli.Command{
 		&cleanFlag,
 		&debugFlag,
 		&verboseFlag,
+		&flattenFlag,
 	},
 	Action: func(c *cli.Context) error {
 		// Load the config file from disk.
@@ -241,7 +243,7 @@ var writeCommand = &cli.Command{
 		// Write the rendered manifests to the output directory.
 		manifests := core.GetManifests(renders)
 		for _, manifest := range manifests {
-			path, err := manifest.Write(flags.OutputDir)
+			path, err := manifest.Write(flags.OutputDir, flags.Flatten)
 			exitOnError(err, -1)
 			printMsg(fmt.Sprintf("Wrote %s\n", path), false)
 		}
@@ -259,6 +261,7 @@ var checkCommand = &cli.Command{
 		&debugFlag,
 		&quietFlag,
 		&verboseFlag,
+		&flattenFlag,
 	},
 	Action: func(c *cli.Context) error {
 		// Load the config file from disk.
@@ -294,7 +297,7 @@ var checkCommand = &cli.Command{
 		manifests := core.GetManifests(renders)
 		for _, manifest := range manifests {
 			printMsg(fmt.Sprintf("Writing %s", manifest.AppName), true)
-			_, err := manifest.Write(tempDir)
+			_, err := manifest.Write(tempDir, flags.Flatten)
 			exitOnError(err, -1)
 		}
 
@@ -335,6 +338,7 @@ var flags struct {
 	Verbose    bool
 	Latest     bool
 	Outdated   bool
+	Flatten    bool
 }
 
 var renderfileFlag = cli.StringFlag{
@@ -418,6 +422,12 @@ var outdatedFlag = cli.BoolFlag{
 	Name:        "outdated",
 	Usage:       "Show only outdated charts",
 	Destination: &flags.Outdated,
+}
+
+var flattenFlag = cli.BoolFlag{
+	Name:        "flatten",
+	Usage:       "Flatten the output of the rendered manifests",
+	Destination: &flags.Flatten,
 }
 
 // diffDirs runs the `diff` command to compare the contents of two directories.

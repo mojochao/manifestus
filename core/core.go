@@ -27,7 +27,7 @@ func EnsureSrcTypesValid(srcTypes []string) error {
 }
 
 // GetOutputFiles returns a list of output files of rendered manifests for named apps in the Config.
-func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string) []string {
+func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string, flatten bool) []string {
 	paths := make([]string, 0)
 	for _, appName := range appNames {
 		app := cfg.FindApp(appName)
@@ -39,7 +39,7 @@ func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string) []string
 				if len(srcNames) > 0 && !contains(srcNames, release.Name) {
 					continue
 				}
-				paths = append(paths, getOutputFilePath(app.Name, release.Name, "release"))
+				paths = append(paths, getOutputFilePath(app.Name, release.Name, "release", flatten))
 			}
 		}
 		if contains(srcTypes, "kustomization") {
@@ -47,7 +47,7 @@ func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string) []string
 				if len(srcNames) > 0 && !contains(srcNames, kustomization.Name) {
 					continue
 				}
-				paths = append(paths, getOutputFilePath(app.Name, kustomization.Name, "kustomization"))
+				paths = append(paths, getOutputFilePath(app.Name, kustomization.Name, "kustomization", flatten))
 			}
 		}
 		if contains(srcTypes, "bundle") {
@@ -55,7 +55,7 @@ func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string) []string
 				if len(srcNames) > 0 && !contains(srcNames, bundle.Name) {
 					continue
 				}
-				paths = append(paths, getOutputFilePath(app.Name, bundle.Name, "bundle"))
+				paths = append(paths, getOutputFilePath(app.Name, bundle.Name, "bundle", flatten))
 			}
 		}
 	}
@@ -123,8 +123,11 @@ func GetManifests(renders []*Render) []*Manifest {
 }
 
 // getOutputFilePath returns the path of an output file of an app rendered manifest.
-func getOutputFilePath(appName, srcName, srcType string) string {
-	return path.Join(appName, fmt.Sprintf("%s.%s.manifest.yaml", srcName, srcType))
+func getOutputFilePath(appName, srcName, srcType string, flatten bool) string {
+	if !flatten {
+		return path.Join(appName, fmt.Sprintf("%s.%s.manifest.yaml", srcName, srcType))
+	}
+	return fmt.Sprintf("%s-%s.%s.manifest.yaml", appName, srcName, srcType)
 }
 
 // Chart represents metadata of a Helm chart defined in a Renderfile or Helmfile.
