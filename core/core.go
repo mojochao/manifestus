@@ -18,8 +18,9 @@ func EnsureAppNamesExist(cfg *Config, appNames []string) error {
 
 // EnsureSrcTypesValid checks if the given source types are valid.
 func EnsureSrcTypesValid(srcTypes []string) error {
+	validSrcTypes := StringKeys(ValidSrcTypes)
 	for _, srcType := range srcTypes {
-		if !contains(ValidSrcTypes, srcType) {
+		if !contains(validSrcTypes, srcType) {
 			return fmt.Errorf("invalid source type '%s'", srcType)
 		}
 	}
@@ -58,12 +59,12 @@ func GetOutputFiles(cfg *Config, appNames, srcNames, srcTypes []string, flatten 
 				paths = append(paths, getOutputFilePath(app.Name, bundle.Name, "bundle", flatten))
 			}
 		}
-		if contains(srcTypes, "crd") {
+		if contains(srcTypes, "crds") {
 			for _, crd := range app.CRDs {
 				if len(srcNames) > 0 && !contains(srcNames, crd.Name) {
 					continue
 				}
-				paths = append(paths, getOutputFilePath(app.Name, crd.Name, "crd", flatten))
+				paths = append(paths, getOutputFilePath(app.Name, crd.Name, "crds", flatten))
 			}
 		}
 	}

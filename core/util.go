@@ -8,8 +8,19 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 )
+
+// StringKeys is a function that returns the sorted string keys of a map.
+func StringKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
 
 // contains tests if a slice contains a given item.
 func contains[T comparable](slice []T, item T) bool {

@@ -107,7 +107,7 @@ type App struct {
 	Releases       []Release       `yaml:"releases"`
 	Kustomizations []Kustomization `yaml:"kustomizations"`
 	Bundles        []Bundle        `yaml:"bundles"`
-	CRDs           []CRD           `yaml:"crds"`
+	CRDs           []CRDs          `yaml:"crds"`
 }
 
 // Release represents the structure of a Helm chart release in '.manifestus.apps.*.releases' section of the config.
@@ -146,7 +146,7 @@ type Kustomization struct {
 	Source string `yaml:"source"`
 }
 
-// Bundle represents the structure of a bundle in '.manifestus.apps.*.bundles' section of the config.
+// Bundle represents the structure of the object in '.manifestus.apps.*.bundles' section of the config.
 type Bundle struct {
 	Name    string            `yaml:"name"`
 	Data    map[string]string `yaml:"data"`
@@ -185,15 +185,15 @@ func (b Bundle) URLs() ([]string, error) {
 	return urls, nil
 }
 
-// CRD represents the structure of a CRD in '.manifestus.apps.*.crds' section of the config.
-type CRD struct {
+// CRDs represents the structure of the object in '.manifestus.apps.*.crds' section of the config.
+type CRDs struct {
 	Name    string            `yaml:"name"`
 	Data    map[string]string `yaml:"data"`
 	Sources []string          `yaml:"sources"`
 }
 
-// Paths returns filesystem paths in a CRD with {placeholders} replaced by values from the CRD's data.
-func (c CRD) Paths() ([]string, error) {
+// Paths returns filesystem paths in a CRDs with {placeholders} replaced by values from the CRDs's data.
+func (c CRDs) Paths() ([]string, error) {
 	paths := make([]string, 0)
 	for _, source := range c.Sources {
 		if isURL(source) {
@@ -208,8 +208,8 @@ func (c CRD) Paths() ([]string, error) {
 	return paths, nil
 }
 
-// URLs returns filesystem paths in a CRD with {placeholders} replaced by values from the CRD's data.
-func (c CRD) URLs() ([]string, error) {
+// URLs returns filesystem paths in a CRDs with {placeholders} replaced by values from the CRDs's data.
+func (c CRDs) URLs() ([]string, error) {
 	urls := make([]string, 0)
 	for _, source := range c.Sources {
 		if !isURL(source) {

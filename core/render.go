@@ -7,8 +7,13 @@ import (
 	"strings"
 )
 
-// ValidSrcTypes is a list of valid source types.
-var ValidSrcTypes = []string{"release", "kustomization", "bundle"}
+// ValidSrcTypes is a mapping of valid source types to their descriptions.
+var ValidSrcTypes = map[string]string{
+	"release":       "Helm chart releases",
+	"kustomization": "Kustomization overlays",
+	"bundle":        "Static non-CRD resources",
+	"crds":          "Static CRD resources",
+}
 
 // Renders is a collection of Render objects containing states of all attempted
 // renders for an App from its configured sources and their renderers.
@@ -112,12 +117,12 @@ func getRendersForApp(app *App, srcNames, srcTypes []string, debug, dryRun bool)
 			results = append(results, renders...)
 		}
 	}
-	if contains(srcTypes, "crd") {
+	if contains(srcTypes, "crds") {
 		for _, crd := range app.CRDs {
 			if len(srcNames) > 0 && !contains(srcNames, crd.Name) {
 				continue
 			}
-			renders, err := renderCRD(app.Name, crd)
+			renders, err := renderCRDs(app.Name, crd)
 			if err != nil {
 				return nil, err
 			}
@@ -220,10 +225,10 @@ func renderBundle(appName string, bundle Bundle) (Renders, error) {
 	return renders, nil
 }
 
-// renderCRD renders an App CRD object.
-func renderCRD(appName string, crd CRD) (Renders, error) {
+// renderCRDs renders an App CRDs object.
+func renderCRDs(appName string, crds CRDs) (Renders, error) {
 	renders := make(Renders, 0)
-	paths, err := crd.Paths()
+	paths, err := crds.Paths()
 	if err != nil {
 		return nil, err
 	}
@@ -235,14 +240,14 @@ func renderCRD(appName string, crd CRD) (Renders, error) {
 		}
 		renders = append(renders, &Render{
 			AppName: appName,
-			SrcName: crd.Name,
-			SrcType: "bundle",
+			SrcName: crds.Name,
+			SrcType: "crds",
 			CmdLine: fmt.Sprintf("cat %s", source), // No command executed for static manifests. Diagnostic only.
 			Stdout:  data,
 			Err:     err,
 		})
 	}
-	urls, err := crd.URLs()
+	urls, err := crds.URLs()
 	if err != nil {
 		return nil, err
 	}
@@ -253,8 +258,8 @@ func renderCRD(appName string, crd CRD) (Renders, error) {
 		}
 		renders = append(renders, &Render{
 			AppName: appName,
-			SrcName: crd.Name,
-			SrcType: "bundle",
+			SrcName: crds.Name,
+			SrcType: "crds",
 			CmdLine: fmt.Sprintf("curl %s", source), // No command executed for static manifests. Diagnostic only.
 			Stdout:  data,
 			Err:     err,

@@ -28,6 +28,7 @@ func New() *cli.App {
 		Usage: "Render Kubernetes manifests from a declarative configuration",
 		Commands: []*cli.Command{
 			appsCommand,
+			typesCommand,
 			chartsCommand,
 			outputsCommand,
 			renderCommand,
@@ -54,6 +55,18 @@ var appsCommand = &cli.Command{
 		for _, app := range cfg.EnabledApps() {
 			fmt.Println(app.Name)
 		}
+		return nil
+	},
+}
+
+var typesCommand = &cli.Command{
+	Name:  "types",
+	Usage: "Show table of all source types names and descriptions",
+	Action: func(c *cli.Context) error {
+		// Print the names of all source types in the config to stdout.
+		table, err := getTypesTable(core.ValidSrcTypes)
+		exitOnError(err, -1)
+		table.Print()
 		return nil
 	},
 }
@@ -120,7 +133,7 @@ var outputsCommand = &cli.Command{
 		// Ensure that we have src types and they are valid.
 		srcTypes := flags.SrcTypes.Value()
 		if len(srcTypes) == 0 {
-			srcTypes = core.ValidSrcTypes
+			srcTypes = core.StringKeys(core.ValidSrcTypes)
 		} else {
 			err = core.EnsureSrcTypesValid(flags.SrcTypes.Value())
 			exitOnError(err, -1)
@@ -160,7 +173,7 @@ var renderCommand = &cli.Command{
 		// Ensure that we have src types and they are valid.
 		srcTypes := flags.SrcTypes.Value()
 		if len(srcTypes) == 0 {
-			srcTypes = core.ValidSrcTypes
+			srcTypes = core.StringKeys(core.ValidSrcTypes)
 		} else {
 			err = core.EnsureSrcTypesValid(flags.SrcTypes.Value())
 			exitOnError(err, -1)
@@ -217,7 +230,7 @@ var writeCommand = &cli.Command{
 		// Ensure that we have src types and they are valid.
 		srcTypes := flags.SrcTypes.Value()
 		if len(srcTypes) == 0 {
-			srcTypes = core.ValidSrcTypes
+			srcTypes = core.StringKeys(core.ValidSrcTypes)
 		} else {
 			err = core.EnsureSrcTypesValid(flags.SrcTypes.Value())
 			exitOnError(err, -1)
@@ -277,7 +290,8 @@ var checkCommand = &cli.Command{
 		// Get the renders for the apps and ensure that they are OK.
 		// Unlike the 'render' command, we won't allow dry-run here as we want to
 		// update the rendered manifests in the output directory.
-		renders, err := core.GetRenders(cfg, appNames, nil, core.ValidSrcTypes, flags.Debug, flags.DryRun)
+		allSrcTypes := core.StringKeys(core.ValidSrcTypes)
+		renders, err := core.GetRenders(cfg, appNames, nil, allSrcTypes, flags.Debug, flags.DryRun)
 		exitOnError(err, -1)
 
 		// Ensure that we're starting with a clean temp directory.
@@ -371,12 +385,10 @@ var srcNamesFlag = cli.StringSliceFlag{
 	Destination: &flags.SrcNames,
 }
 
-var validSrcTypes = strings.Join(core.ValidSrcTypes, " | ")
-
 var srcTypesFlag = cli.StringSliceFlag{
 	Name:        "type",
 	Aliases:     []string{"t"},
-	Usage:       fmt.Sprintf("Specify the type of source to render (valid: %s)", validSrcTypes),
+	Usage:       fmt.Sprintf("Specify the type of source to render (valid: %s)", strings.Join(core.StringKeys(core.ValidSrcTypes), " | ")),
 	Destination: &flags.SrcTypes,
 }
 
@@ -475,6 +487,26 @@ func getAppNames(cfg *core.Config, appNames []string) ([]string, error) {
 	}
 	sort.Strings(appNames)
 	return appNames, nil
+}
+
+// getTypesTable returns a table of source type names and descriptions.
+func getTypesTable(types map[string]string) (table.Table, error) {
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+	srcTypeNames := make([]string, 0, len(types))
+	for name := range types {
+		srcTypeNames = append(srcTypeNames, name)
+	}
+	sort.Strings(srcTypeNames)
+
+	tbl := table.New("Name", "Description")
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+	for _, name := range srcTypeNames {
+		tbl.AddRow(name, types[name])
+	}
+	return tbl, nil
 }
 
 // getChartsTable returns a table of charts.
