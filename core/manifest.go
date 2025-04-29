@@ -18,8 +18,12 @@ type Manifest struct {
 
 // Doc returns the assembled, cleaned Manifest renders as a single document.
 // It adds a source header comment followed by all the yaml renders separated by '---'.
-func (m *Manifest) Doc() string {
-	header := fmt.Sprintf("#:manifestus render{appName=%s, srcName=%s, srcType=%s}", m.AppName, m.SrcName, m.SrcType)
+func (m *Manifest) Doc(noBanner bool) string {
+	var header string
+	if !noBanner {
+		header = fmt.Sprintf("#:manifestus render{appName=%s, srcName=%s, srcType=%s}", m.AppName, m.SrcName, m.SrcType)
+	}
+
 	docs := make([]string, 0)
 	for _, render := range m.Renders {
 		docs = append(docs, render.Doc())
@@ -28,7 +32,7 @@ func (m *Manifest) Doc() string {
 }
 
 // Write writes the manifest to a file in the output directory.
-func (m *Manifest) Write(outputDir string, flatten bool) (string, error) {
+func (m *Manifest) Write(outputDir string, flatten bool, noBanner bool) (string, error) {
 	p := path.Join(outputDir, getOutputFilePath(m.AppName, m.SrcName, m.SrcType, flatten))
 	if p, err := filepath.Abs(p); err != nil {
 		return p, err
@@ -36,6 +40,6 @@ func (m *Manifest) Write(outputDir string, flatten bool) (string, error) {
 	if err := os.MkdirAll(path.Dir(p), 0755); err != nil {
 		return p, err
 	}
-	err := os.WriteFile(p, []byte(m.Doc()), 0644)
+	err := os.WriteFile(p, []byte(m.Doc(noBanner)), 0644)
 	return p, err
 }

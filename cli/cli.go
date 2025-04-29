@@ -158,6 +158,7 @@ var renderCommand = &cli.Command{
 		&srcTypesFlag,
 		&dryRunFlag,
 		&debugFlag,
+		&noBannerFlag,
 	},
 	Action: func(c *cli.Context) error {
 		// Load the config file from disk.
@@ -196,7 +197,7 @@ var renderCommand = &cli.Command{
 		// Otherwise, print the rendered manifests to stdout and return.
 		manifests := core.GetManifests(renders)
 		for _, manifest := range manifests {
-			fmt.Println(manifest.Doc())
+			fmt.Println(manifest.Doc(flags.NoBanner))
 		}
 		return nil
 	},
@@ -215,6 +216,7 @@ var writeCommand = &cli.Command{
 		&debugFlag,
 		&verboseFlag,
 		&flattenFlag,
+		&noBannerFlag,
 	},
 	Action: func(c *cli.Context) error {
 		// Load the config file from disk.
@@ -256,7 +258,7 @@ var writeCommand = &cli.Command{
 		// Write the rendered manifests to the output directory.
 		manifests := core.GetManifests(renders)
 		for _, manifest := range manifests {
-			path, err := manifest.Write(flags.OutputDir, flags.Flatten)
+			path, err := manifest.Write(flags.OutputDir, flags.Flatten, flags.NoBanner)
 			exitOnError(err, -1)
 			printMsg(fmt.Sprintf("Wrote %s\n", path), false)
 		}
@@ -275,6 +277,7 @@ var checkCommand = &cli.Command{
 		&quietFlag,
 		&verboseFlag,
 		&flattenFlag,
+		&noBannerFlag,
 	},
 	Action: func(c *cli.Context) error {
 		// Load the config file from disk.
@@ -311,7 +314,7 @@ var checkCommand = &cli.Command{
 		manifests := core.GetManifests(renders)
 		for _, manifest := range manifests {
 			printMsg(fmt.Sprintf("Writing %s", manifest.AppName), true)
-			_, err := manifest.Write(tempDir, flags.Flatten)
+			_, err := manifest.Write(tempDir, flags.Flatten, flags.NoBanner)
 			exitOnError(err, -1)
 		}
 
@@ -353,6 +356,7 @@ var flags struct {
 	Latest     bool
 	Outdated   bool
 	Flatten    bool
+	NoBanner   bool
 }
 
 var renderfileFlag = cli.StringFlag{
@@ -440,6 +444,12 @@ var flattenFlag = cli.BoolFlag{
 	Name:        "flatten",
 	Usage:       "Flatten the output of the rendered manifests",
 	Destination: &flags.Flatten,
+}
+
+var noBannerFlag = cli.BoolFlag{
+	Name:        "no-banner",
+	Usage:       "Suppress comment banners in rendered manifests",
+	Destination: &flags.NoBanner,
 }
 
 // diffDirs runs the `diff` command to compare the contents of two directories.
